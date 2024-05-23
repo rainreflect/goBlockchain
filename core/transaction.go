@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rainreflect/gochain/crypto"
+	"github.com/rainreflect/gochain/types"
 )
 
 type Transaction struct {
@@ -11,6 +12,22 @@ type Transaction struct {
 
 	From      crypto.PublicKey
 	Signature *crypto.Signature
+
+	//cached tx data hash
+	hash types.Hash
+}
+
+func NewTransaction(data []byte) *Transaction {
+	return &Transaction{
+		Data: data,
+	}
+}
+
+func (tx *Transaction) Hash(h Hasher[*Transaction]) types.Hash {
+	if tx.hash.IsZero() {
+		tx.hash = h.Hash(tx)
+	}
+	return h.Hash(tx)
 }
 
 func (tx *Transaction) Sign(privKey crypto.PrivateKey) error {
